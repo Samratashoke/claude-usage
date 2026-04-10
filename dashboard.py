@@ -372,6 +372,15 @@ const RANGE_LABELS = { 'week': 'This Week', 'month': 'This Month', 'prev-month':
 const RANGE_TICKS  = { 'week': 7, 'month': 15, 'prev-month': 15, '7d': 7, '30d': 15, '90d': 13, 'all': 12 };
 const VALID_RANGES = Object.keys(RANGE_LABELS);
 
+function rangeIncludesToday(range) {
+  if (range === 'all') return true;
+  const { start, end } = getRangeBounds(range);
+  const today = new Date().toISOString().slice(0, 10);
+  if (start && today < start) return false;
+  if (end && today > end) return false;
+  return true;
+}
+
 function getRangeBounds(range) {
   if (range === 'all') return { start: null, end: null };
   const today = new Date();
@@ -411,6 +420,7 @@ function setRange(range) {
   );
   updateURL();
   applyFilter();
+  scheduleAutoRefresh();
 }
 
 // ── Model filter ───────────────────────────────────────────────────────────
@@ -881,7 +891,8 @@ async function loadData() {
       document.body.innerHTML = '<div style="padding:40px;color:#f87171">' + esc(d.error) + '</div>';
       return;
     }
-    document.getElementById('meta').textContent = 'Updated: ' + d.generated_at + ' \u00b7 Auto-refresh in 30s';
+    const refreshNote = rangeIncludesToday(selectedRange) ? ' \u00b7 Auto-refresh in 30s' : '';
+    document.getElementById('meta').textContent = 'Updated: ' + d.generated_at + refreshNote;
 
     const isFirstLoad = rawData === null;
     rawData = d;
@@ -905,8 +916,16 @@ async function loadData() {
   }
 }
 
+let autoRefreshTimer = null;
+function scheduleAutoRefresh() {
+  if (autoRefreshTimer) { clearInterval(autoRefreshTimer); autoRefreshTimer = null; }
+  if (rangeIncludesToday(selectedRange)) {
+    autoRefreshTimer = setInterval(loadData, 30000);
+  }
+}
+
 loadData();
-setInterval(loadData, 30000);
+scheduleAutoRefresh();
 </script>
 </body>
 </html>
