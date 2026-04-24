@@ -30,6 +30,9 @@ def _model_priority(model):
 
 
 def get_db(db_path=DB_PATH):
+    # Ensure the parent directory exists — on a fresh install or CI runner
+    # ~/.claude may not yet exist, and sqlite3.connect needs the parent dir.
+    Path(db_path).parent.mkdir(parents=True, exist_ok=True)
     conn = sqlite3.connect(db_path)
     conn.row_factory = sqlite3.Row
     return conn
