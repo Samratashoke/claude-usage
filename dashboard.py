@@ -21,10 +21,12 @@ def get_dashboard_data(db_path=DB_PATH):
     conn.row_factory = sqlite3.Row
 
     # ── All models (for filter UI) ────────────────────────────────────────────
+    # GROUP BY uses the normalised expression too so NULL and '' don't end up
+    # as two separate "unknown" rows.
     model_rows = conn.execute("""
         SELECT COALESCE(NULLIF(model, ''), 'unknown') as model
         FROM turns
-        GROUP BY model
+        GROUP BY COALESCE(NULLIF(model, ''), 'unknown')
         ORDER BY SUM(input_tokens + output_tokens) DESC
     """).fetchall()
     all_models = [r["model"] for r in model_rows]
@@ -40,7 +42,7 @@ def get_dashboard_data(db_path=DB_PATH):
             SUM(cache_creation_tokens) as cache_creation,
             COUNT(*)                   as turns
         FROM turns
-        GROUP BY day, model
+        GROUP BY day, COALESCE(NULLIF(model, ''), 'unknown')
         ORDER BY day, model
     """).fetchall()
 
@@ -60,12 +62,12 @@ def get_dashboard_data(db_path=DB_PATH):
         SELECT
             substr(timestamp, 1, 10)                  as day,
             CAST(substr(timestamp, 12, 2) AS INTEGER) as hour,
-            COALESCE(NULLIF(model, ''), 'unknown')                as model,
+            COALESCE(NULLIF(model, ''), 'unknown')    as model,
             SUM(output_tokens)                        as output,
             COUNT(*)                                  as turns
         FROM turns
         WHERE timestamp IS NOT NULL AND length(timestamp) >= 13
-        GROUP BY day, hour, model
+        GROUP BY day, hour, COALESCE(NULLIF(model, ''), 'unknown')
         ORDER BY day, hour, model
     """).fetchall()
 
