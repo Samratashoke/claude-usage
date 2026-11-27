@@ -213,3 +213,19 @@ repo:
 2. JWT `tenant` claim (if authenticated)
 3. Subdomain (`acme.claude-usage.example.com` → tenant `acme`)
 4. Default tenant (if no resolution)
+
+
+## Contributing
+Read the contribution guide before submitting changes.
+Avoid duplicate issues by searching first.
+## Support
+- Bugs: https://github.com/Samratashoke/claude-usage/issues
+- Ideas & general chat: https://github.com/Samratashoke/claude-usage/discussions
+## Star History
+[![Star History Chart](https://api.star-history.com/svg?repos=Samratashoke/claude-usage&type=Date)](https://star-history.com/#Samratashoke/claude-usage&Date)
+## Acknowledgements
+Thanks to contributors and upstream open-source communities.
+## Disclaimer
+This software is for research use. Users are responsible for legal compliance.
+## License
+[![License-MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
