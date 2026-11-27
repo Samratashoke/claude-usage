@@ -188,3 +188,28 @@ See [vscode-extension/README.md](vscode-extension/README.md) for settings, comma
 | `vscode-extension/` | VS Code extension — embeds the dashboard inside VS Code |
 | `Dockerfile` | Container image definition |
 | `scripts/run-docker.sh` | Build and run the dashboard in Docker with a read-only `~/.claude` mount |
+
+
+## Multi-Tenant
+
+claude-usage supports true multi-tenancy — three isolation modes:
+
+| Mode | Data Isolation | Cost | Use Case |
+|------|---------------|------|----------|
+| **Shared DB** | Row-level (`tenant_id`) | Lowest | SaaS MVP |
+| Schema-per-tenant | Separate Postgres schema | Medium | Most SaaS |
+| DB-per-tenant | Separate database | Highest | Enterprise onboarding |
+
+### Configure
+```yaml
+repo:
+  multi-tenant:
+    enabled: true
+    mode: schema  # shared | schema | database
+```
+
+### Automatic Tenant Resolution
+1. `X-Tenant-Id` HTTP header
+2. JWT `tenant` claim (if authenticated)
+3. Subdomain (`acme.claude-usage.example.com` → tenant `acme`)
+4. Default tenant (if no resolution)
